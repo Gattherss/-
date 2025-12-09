@@ -172,8 +172,7 @@ export async function updateProject(
   if (payload.deadline !== undefined) updateData.deadline = payload.deadline;
   if (payload.status !== undefined) updateData.status = payload.status;
 
-  // @ts-ignore - Supabase type inference issue with strict mode in Vercel
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from("projects")
     .update(updateData)
     .eq("id", id);
