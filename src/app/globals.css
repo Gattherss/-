@@ -1,26 +1,141 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --text-primary: #e5e7eb;
+  --text-secondary: #94a3b8;
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent: #06b6d4;
+
+  /* Burn Status */
+  --burn-safe: #06b6d4;
+  --burn-warning: #f59e0b;
+  --burn-critical: #ef4444;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: rgba(0, 0, 0, 0.03);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: rgba(0, 0, 0, 0.5);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --accent: #0891b2;
+}
+
+/* Warm theme (暖色) */
+[data-theme="warm"] {
+  color-scheme: dark;
+  --bg-primary: #1a1410;
+  --bg-secondary: #231c16;
+  --bg-card: rgba(255, 200, 150, 0.05);
+  --text-primary: #f5e6d3;
+  --text-secondary: #d4b896;
+  --text-muted: rgba(255, 230, 200, 0.5);
+  --border-color: rgba(255, 200, 150, 0.15);
+  --accent: #f59e0b;
+}
+
+/* Blue theme (深蓝) */
+[data-theme="blue"] {
+  color-scheme: dark;
+  --bg-primary: #0c1222;
+  --bg-secondary: #111827;
+  --bg-card: rgba(100, 150, 255, 0.05);
+  --text-primary: #e0e7ff;
+  --text-secondary: #a5b4fc;
+  --text-muted: rgba(200, 210, 255, 0.5);
+  --border-color: rgba(100, 150, 255, 0.15);
+  --accent: #6366f1;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-burn-safe: var(--burn-safe);
+  --color-burn-warning: var(--burn-warning);
+  --color-burn-critical: var(--burn-critical);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui,
+    -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+
+  --radius-lg: 1.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
+}
+
+/* Override Tailwind colors for theme compatibility */
+[data-theme="light"] .text-white {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .text-white\/90,
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/70 {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .text-white\/60,
+[data-theme="light"] .text-white\/50,
+[data-theme="light"] .text-white\/40,
+[data-theme="light"] .text-white\/30 {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .bg-white\/5,
+[data-theme="light"] .bg-white\/10 {
+  background-color: var(--bg-card) !important;
+}
+
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/5 {
+  border-color: var(--border-color) !important;
+}
+
+/* Utilities for hiding scrollbar but allowing scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Fix native select dropdown styling for dark theme */
+select {
+  color-scheme: inherit;
+  background-color: var(--bg-secondary);
+}
+
+select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+select option:hover,
+select option:checked {
+  background-color: var(--bg-card);
 }
