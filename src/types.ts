@@ -34,6 +34,8 @@ export interface ProjectStats {
   daysRemaining: number;
   totalBudget: number;
   totalSpent: number;
+  isOverspent: boolean;
+  overspentAmount: number;
 }
 
 export interface ProjectStatsResponse {

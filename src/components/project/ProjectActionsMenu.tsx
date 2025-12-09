@@ -6,6 +6,7 @@ import { type Project } from "@/types";
 import { updateProject, deleteProject } from "@/app/actions";
 import { MoreVertical, Edit, CheckCircle, Archive, Trash2, Loader2 } from "lucide-react";
 import { EditProjectDialog } from "./EditProjectDialog";
+import { Fireworks } from "@/components/ui/Fireworks";
 
 interface ProjectActionsMenuProps {
     project: Project;
@@ -14,6 +15,7 @@ interface ProjectActionsMenuProps {
 export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
+    const [showFireworks, setShowFireworks] = useState(false);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
@@ -35,12 +37,15 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
 
         let newStatus: string = action;
         let confirmMsg = "";
+        let shouldCelebrate = false;
         if (action === "complete") {
             newStatus = "completed";
             confirmMsg = "确定要完结此项目吗？";
+            shouldCelebrate = true;
         } else if (action === "archive") {
             newStatus = "archived";
             confirmMsg = "确定要归档此项目吗？";
+            shouldCelebrate = true;
         } else {
             newStatus = "active";
             confirmMsg = "确定要将项目恢复至进行中吗？";
@@ -52,6 +57,8 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
             const res = await updateProject(project.id, { status: newStatus } as any);
             if (res?.error) {
                 alert("操作失败: " + res.error);
+            } else if (shouldCelebrate) {
+                setShowFireworks(true);
             }
         });
     };
@@ -120,6 +127,12 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
                 project={project}
                 isOpen={showEditDialog}
                 onClose={() => setShowEditDialog(false)}
+            />
+
+            <Fireworks
+                isActive={showFireworks}
+                onComplete={() => setShowFireworks(false)}
+                duration={2500}
             />
         </div>
     );

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Delete } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface NumPadProps {
   value: string;
@@ -13,6 +14,7 @@ interface NumPadProps {
 
 export function NumPad({ value, onChange, onSubmit, className }: NumPadProps) {
   const keys = ["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "DEL"];
+  const { playKeypress } = useSoundEffects();
 
   const resolveNext = (current: string, key: string) => {
     if (key === "DEL") {
@@ -39,6 +41,8 @@ export function NumPad({ value, onChange, onSubmit, className }: NumPadProps) {
   };
 
   const handlePress = (k: string) => {
+    playKeypress(); // Play keypress sound
+
     if (typeof navigator !== "undefined" && navigator.vibrate) {
       navigator.vibrate(5);
     }

@@ -111,10 +111,10 @@ export default async function ProjectDetail({
         <div className="mt-4 sm:mt-6 flex flex-col sm:grid sm:grid-cols-3 gap-2 sm:gap-3">
           <div className="rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 p-2.5 sm:p-3 flex sm:flex-col items-center sm:items-stretch justify-between sm:justify-start sm:text-center">
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-mono">
-              剩余
+              {stats.isOverspent ? "超支" : "剩余"}
             </div>
-            <div className="text-lg sm:text-xl font-mono font-bold text-white">
-              {currency.format(stats.budgetRemaining)}
+            <div className={`text-lg sm:text-xl font-mono font-bold ${stats.isOverspent ? "text-red-400" : "text-white"}`}>
+              {stats.isOverspent ? `-${currency.format(stats.overspentAmount)}` : currency.format(stats.budgetRemaining)}
             </div>
           </div>
           <div className="rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 p-2.5 sm:p-3 flex sm:flex-col items-center sm:items-stretch justify-between sm:justify-start sm:text-center">

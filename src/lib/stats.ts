@@ -18,12 +18,18 @@ export function mapProjectStats(
   const totalDays = Math.max((end.getTime() - start.getTime()) / DAY_MS, 0);
   const elapsedDays = Math.max((now.getTime() - start.getTime()) / DAY_MS, 0);
 
+  const budgetRemaining = totalBudget - spent;
+  const isOverspent = budgetRemaining < 0;
+  const overspentAmount = isOverspent ? Math.abs(budgetRemaining) : 0;
+
   return {
     budgetConsumedPct: raw.budget_consumed_pct,
     timeElapsedPct: raw.time_elapsed_pct,
-    budgetRemaining: Math.max(totalBudget - spent, 0),
+    budgetRemaining,
     daysRemaining: Math.max(0, totalDays - elapsedDays),
     totalBudget,
     totalSpent: spent,
+    isOverspent,
+    overspentAmount,
   };
 }

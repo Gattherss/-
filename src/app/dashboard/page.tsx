@@ -70,21 +70,36 @@ export default function DashboardPage() {
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                         <h2 className="text-sm font-bold text-white mb-4">按分类</h2>
                         {data.categoryData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={200}>
+                            <ResponsiveContainer width="100%" height={280}>
                                 <PieChart>
                                     <Pie
-                                        data={data.categoryData}
+                                        data={data.categoryData.map(item => ({
+                                            ...item,
+                                            displayName: CATEGORY_LABELS[item.name as string] || item.name
+                                        }))}
                                         cx="50%"
-                                        cy="50%"
+                                        cy="40%"
                                         outerRadius={70}
                                         dataKey="value"
-                                        label={({ name, percent }) => `${CATEGORY_LABELS[name as string] || name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-                                        labelLine={false}
+                                        nameKey="displayName"
+                                        label={false}
                                     >
                                         {data.categoryData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
+                                        labelStyle={{ color: "#fff" }}
+                                        formatter={(value: number, name: string) => [`$${value.toFixed(2)}`, name]}
+                                    />
+                                    <Legend
+                                        layout="horizontal"
+                                        verticalAlign="bottom"
+                                        align="center"
+                                        wrapperStyle={{ paddingTop: "16px" }}
+                                        formatter={(value: string) => <span style={{ color: "#94a3b8", fontSize: "12px" }}>{value}</span>}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (

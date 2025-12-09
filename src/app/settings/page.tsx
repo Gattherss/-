@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, CheckCircle, XCircle, Save, Key } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle, XCircle, Save, Key, Volume2 } from "lucide-react";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -10,6 +11,8 @@ export default function SettingsPage() {
     const [testing, setTesting] = useState(false);
     const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
     const [saved, setSaved] = useState(false);
+    const { isEnabled, setEnabled } = useSoundEffects();
+    const [soundEnabled, setSoundEnabled] = useState(isEnabled());
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -52,6 +55,12 @@ export default function SettingsPage() {
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         }
+    };
+
+    const handleSoundToggle = () => {
+        const newValue = !soundEnabled;
+        setSoundEnabled(newValue);
+        setEnabled(newValue);
     };
 
     return (
@@ -122,6 +131,32 @@ export default function SettingsPage() {
                             <XCircle size={12} /> API 连接失败，请检查密钥
                         </div>
                     )}
+                </div>
+            </section>
+
+            {/* Sound Effects Setting */}
+            <section className="rounded-2xl border border-white/10 bg-white/5 p-5 mt-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                            <Volume2 size={18} className="text-green-400" />
+                        </div>
+                        <div>
+                            <h2 className="font-bold text-white">音效</h2>
+                            <p className="text-xs text-white/50">按键和操作提示音</p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleSoundToggle}
+                        className={`relative w-14 h-8 rounded-full transition-colors ${soundEnabled ? "bg-green-500" : "bg-white/10"
+                            }`}
+                    >
+                        <div
+                            className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white transition-transform ${soundEnabled ? "translate-x-6" : ""
+                                }`}
+                        />
+                    </button>
                 </div>
             </section>
 

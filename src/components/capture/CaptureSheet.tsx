@@ -4,9 +4,10 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { NumPad } from "./NumPad";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Check, Loader2 } from "lucide-react";
+import { Camera, Check, Loader2, Upload } from "lucide-react";
 import { createTransaction } from "@/app/actions";
 import { type Project } from "@/types";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 interface CaptureSheetProps {
   isOpen: boolean;
@@ -29,7 +30,9 @@ export function CaptureSheet({
   const [step, setStep] = useState<"amount" | "success">("amount");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { playCashRegister } = useSoundEffects();
 
   const defaultProjectId = useMemo(
     () => projectId ?? projects[0]?.id ?? "",
@@ -83,6 +86,7 @@ export function CaptureSheet({
         if (receipt) payload.append("receipt", receipt);
 
         await createTransaction(payload);
+        playCashRegister(); // Play success sound
         setStep("success");
         setTimeout(() => handleClose(), 900);
       } catch (err) {
@@ -195,23 +199,42 @@ export function CaptureSheet({
                     <label className="text-xs uppercase tracking-[0.2em] text-white/50 font-mono">
                       收据
                     </label>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex-1 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="flex items-center gap-1.5 rounded-2xl bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 active:scale-[0.98] transition"
+                      >
+                        <Camera size={16} />
+                        <span>拍照</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 active:scale-[0.98] transition"
+                        className="flex items-center gap-1.5 rounded-2xl bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 active:scale-[0.98] transition"
                       >
-                        <Camera size={16} />
-                        <span>{receipt ? "重新拍摄" : "拍摄/上传"}</span>
+                        <Upload size={16} />
+                        <span>上传</span>
                       </button>
-                      <span className="text-xs text-white/50 truncate">
+                      <span className="text-xs text-white/50 truncate max-w-[120px]">
                         {receipt ? receipt.name : "暂无文件"}
                       </span>
+                      {/* Camera capture input */}
+                      <input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) =>
+                          setReceipt(e.target.files?.[0] ?? null)
+                        }
+                      />
+                      {/* File upload input (no capture) */}
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        capture="environment"
                         className="hidden"
                         onChange={(e) =>
                           setReceipt(e.target.files?.[0] ?? null)

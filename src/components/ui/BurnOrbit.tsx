@@ -24,10 +24,12 @@ export function BurnOrbit({
 }: BurnOrbitProps) {
   const burn = clamp(budgetPct);
   const time = clamp(timePct);
-  const isTimeAhead = time >= burn;
-  const glowColor = isTimeAhead
-    ? "var(--color-burn-safe)"
-    : "var(--color-burn-critical)";
+
+  // Green when budget not exceeded, red when overspent
+  const isOverspent = burn >= 1.0;
+  const glowColor = isOverspent
+    ? "var(--color-burn-critical)" // Red when overspent
+    : "var(--color-burn-safe)";    // Green when on budget
 
   const radius = (size - strokeWidth) / 2;
   const circuit = 2 * Math.PI * radius;
@@ -69,7 +71,7 @@ export function BurnOrbit({
           r={radius}
           fill="none"
           stroke={glowColor}
-          strokeOpacity={isTimeAhead ? 0.7 : 0.3}
+          strokeOpacity={isOverspent ? 0.3 : 0.7}
           strokeWidth={strokeWidth}
           strokeDasharray={circuit}
           strokeLinecap="round"
