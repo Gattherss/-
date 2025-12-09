@@ -9,6 +9,7 @@ export interface Project {
   deadline: string; // ISO date
   status: ProjectStatus;
   created_at: string;
+  user_id?: string;
 }
 
 export interface Transaction {
@@ -23,6 +24,7 @@ export interface Transaction {
   category?: string | null; // expense category
   status: TransactionStatus;
   created_at?: string;
+  user_id?: string;
 }
 
 export interface ProjectStats {

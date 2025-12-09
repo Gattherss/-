@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase-server";
 import type { Database } from "@/types";
 
 const parseDate = (value: string | null) => {
@@ -13,6 +13,11 @@ const parseDate = (value: string | null) => {
 export async function createProject(
   formData: FormData
 ): Promise<{ success: boolean; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: "请先登录" };
+  }
+
   const name = formData.get("name")?.toString().trim();
   const budgetRaw = formData.get("total_budget")?.toString();
   const startRaw = formData.get("start_date")?.toString();
@@ -34,12 +39,13 @@ export async function createProject(
   const startDate = parseDate(startRaw ?? null) ?? defaultStart;
   const deadline = parseDate(endRaw ?? null) ?? defaultEnd;
 
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const payload: Database["public"]["Tables"]["projects"]["Insert"] = {
     name,
     total_budget: totalBudget,
     start_date: startDate,
     deadline,
+    user_id: user.id,
   };
 
   const { error } = await (supabase as any)
@@ -52,3 +58,4 @@ export async function createProject(
   revalidatePath("/");
   return { success: true };
 }
+

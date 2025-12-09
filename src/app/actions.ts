@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase-server";
 import type {
   Database,
   ProjectStatsResponse,
@@ -12,7 +12,12 @@ import type {
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
 export async function createTransaction(formData: FormData) {
-  const supabase = supabaseServerClient();
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("请先登录");
+  }
+
+  const supabase = await createSupabaseServerClient();
 
   let projectId = formData.get("projectId")?.toString();
   const rawAmount = formData.get("amount")?.toString() ?? "";
@@ -52,6 +57,7 @@ export async function createTransaction(formData: FormData) {
         deadline: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
           .toISOString()
           .slice(0, 10),
+        user_id: user.id,
       };
 
       const { data: created, error: createErr } = await (supabase as any)
@@ -106,6 +112,7 @@ export async function createTransaction(formData: FormData) {
     occurred_at: occurredAt,
     receipt_urls: receiptUrls.length > 0 ? receiptUrls : null,
     status,
+    user_id: user.id,
   };
 
   const { data, error } = await (supabase as any)
@@ -128,7 +135,7 @@ export async function createTransaction(formData: FormData) {
 }
 
 export async function deleteTransaction(transactionId: string, projectId: string) {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("transactions")
     .delete()
@@ -143,7 +150,7 @@ export async function deleteTransaction(transactionId: string, projectId: string
 }
 
 export async function getReceiptUrl(path: string) {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.storage
     .from("receipts")
     .createSignedUrl(path, 60 * 60);
@@ -162,7 +169,7 @@ export async function updateProject(
     status: ProjectStatus;
   }>
 ) {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   // Explicitly construct update object to avoid type inference issues
   const updateData: Record<string, any> = {};
@@ -184,7 +191,7 @@ export async function updateProject(
 }
 
 export async function deleteProject(id: string) {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("projects")
     .delete()
@@ -198,7 +205,7 @@ export async function deleteProject(id: string) {
 export async function getProjectStats(
   projectId: string
 ): Promise<ProjectStatsResponse> {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
@@ -279,7 +286,7 @@ export async function askAssistant(
     return { error: "缺少 DEEPSEEK_API_KEY 环境变量" };
   }
 
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: projects } = await supabase
     .from("projects")
@@ -380,7 +387,7 @@ async function withRetry<T>(operation: () => Promise<T>, retries = 3, delayMs = 
 }
 
 export async function updateTransaction(formData: FormData) {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const id = formData.get("id")?.toString();
   const projectId = formData.get("projectId")?.toString();
@@ -465,7 +472,7 @@ export async function updateTransaction(formData: FormData) {
 }
 
 export async function searchTransactions(query: string) {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const searchTerm = `%${query}%`;
 
@@ -484,7 +491,7 @@ export async function searchTransactions(query: string) {
 }
 
 export async function getDashboardData() {
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   // Fetch all transactions
   const { data: transactions, error } = await supabase
