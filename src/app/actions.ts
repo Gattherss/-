@@ -447,7 +447,7 @@ export async function updateTransaction(formData: FormData) {
 
     // Retry database update
     await withRetry(async () => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("transactions")
         .update(updates)
         .eq("id", id);
