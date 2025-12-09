@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { mapProjectStats } from "@/lib/stats";
 import { BurnOrbit } from "@/components/ui/BurnOrbit";
 import { CaptureLauncher } from "@/components/capture/CaptureLauncher";
@@ -21,7 +21,7 @@ export default async function ProjectDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const [projectRes, transactionsRes] = await Promise.all([
     supabase.from("projects").select("*").eq("id", id).single(),

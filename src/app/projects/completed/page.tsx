@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getProjectStats } from "@/app/actions";
 import { type ProjectStats, type Database } from "@/types";
 import { ProjectCard } from "@/components/ui/ProjectCard";
@@ -7,7 +7,7 @@ import { mapProjectStats } from "@/lib/stats";
 import { ArrowLeft } from "lucide-react";
 
 export default async function CompletedProjectsPage() {
-    const supabase = supabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: projects, error } = await supabase
         .from("projects")
         .select("*")

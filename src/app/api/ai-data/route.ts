@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { Database } from "@/types";
 
 type ProjectRow = Database["public"]["Tables"]["projects"]["Row"];
@@ -7,7 +7,7 @@ type TransactionRow = Database["public"]["Tables"]["transactions"]["Row"];
 
 export async function GET() {
     try {
-        const supabase = supabaseServerClient();
+        const supabase = await createSupabaseServerClient();
 
         // Fetch all active projects
         const { data: projects } = await supabase

@@ -1,4 +1,4 @@
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { Database } from "@/types";
 
 type ProjectRow = Database["public"]["Tables"]["projects"]["Row"];
@@ -28,7 +28,7 @@ export interface AIDataSummary {
 }
 
 export async function getAIDataSummary(): Promise<AIDataSummary> {
-    const supabase = supabaseServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // Fetch all active projects
     const { data: projects } = await supabase

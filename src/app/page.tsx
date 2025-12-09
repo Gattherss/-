@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getProjectStats } from "./actions";
 import { type ProjectStats, type Database } from "@/types";
 import { ProjectCard } from "@/components/ui/ProjectCard";
@@ -13,7 +13,7 @@ export default async function Home() {
   const hasSupabaseEnv =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL) &&
     Boolean(
-      process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
   if (!hasSupabaseEnv) {
@@ -37,7 +37,7 @@ export default async function Home() {
     );
   }
 
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   // Fetch active projects (or those without status for migration safety)
   // Note: 'is' filter for null might need explicit "or" syntax if not defaulted.
   // Since we set default, simple 'active' check is mostly sufficient, 

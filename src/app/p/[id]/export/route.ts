@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = supabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
@@ -36,9 +36,8 @@ export async function GET(
     (transactions as { occurred_at: string; amount: number; vendor: string | null; status: string; receipt_url: string | null }[] | null)
       ?.map((tx) => {
         const date = new Date(tx.occurred_at).toISOString();
-        return `${date},${tx.amount},${tx.vendor ?? ""},${tx.status},${
-          tx.receipt_url ?? ""
-        }`;
+        return `${date},${tx.amount},${tx.vendor ?? ""},${tx.status},${tx.receipt_url ?? ""
+          }`;
       }) ?? [];
 
   const csv = header + rows.join("\n");
