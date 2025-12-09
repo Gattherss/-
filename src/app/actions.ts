@@ -210,12 +210,10 @@ export async function getProjectStats(
     // Return empty stats instead of throwing to prevent page crash
     console.warn("getProjectStats: Project not found", projectId, projectError);
     return {
-      budget: 0,
-      spent: 0,
-      remaining: 0,
-      burnRatio: 0,
-      timeRatio: 0,
-      daysRemaining: 0,
+      budget_consumed_pct: 0,
+      time_elapsed_pct: 0,
+      total_spent: 0,
+      total_budget: 0,
     };
   }
 
