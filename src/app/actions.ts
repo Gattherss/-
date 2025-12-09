@@ -155,7 +155,7 @@ export async function updateProject(id: string, payload: Partial<Database["publi
   const supabase = supabaseServerClient();
   const { error } = await supabase
     .from("projects")
-    .update(payload)
+    .update(payload as any)
     .eq("id", id);
 
   if (error) return { error: error.message };
