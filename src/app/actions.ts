@@ -6,6 +6,7 @@ import type {
   Database,
   ProjectStatsResponse,
   TransactionStatus,
+  ProjectStatus,
 } from "@/types";
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
@@ -151,11 +152,30 @@ export async function getReceiptUrl(path: string) {
   return { url: data?.signedUrl };
 }
 
-export async function updateProject(id: string, payload: Partial<Database["public"]["Tables"]["projects"]["Insert"]>) {
+export async function updateProject(
+  id: string,
+  payload: Partial<{
+    name: string;
+    total_budget: number;
+    start_date: string;
+    deadline: string;
+    status: ProjectStatus;
+  }>
+) {
   const supabase = supabaseServerClient();
+
+  // Explicitly construct update object to avoid type inference issues
+  const updateData: Record<string, any> = {};
+  if (payload.name !== undefined) updateData.name = payload.name;
+  if (payload.total_budget !== undefined) updateData.total_budget = payload.total_budget;
+  if (payload.start_date !== undefined) updateData.start_date = payload.start_date;
+  if (payload.deadline !== undefined) updateData.deadline = payload.deadline;
+  if (payload.status !== undefined) updateData.status = payload.status;
+
+  // @ts-ignore - Supabase type inference issue with strict mode in Vercel
   const { error } = await supabase
     .from("projects")
-    .update(payload as any)
+    .update(updateData)
     .eq("id", id);
 
   if (error) return { error: error.message };
