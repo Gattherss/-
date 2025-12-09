@@ -81,13 +81,13 @@ export default async function ProjectDetail({
         </div>
       </header>
 
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 mb-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-2">
+      <section className="rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-6 mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-2 w-full sm:w-auto">
             <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/50">
               燃烧轨道
             </p>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               {projectRow.name}
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-white/60">
@@ -101,35 +101,36 @@ export default async function ProjectDetail({
           <BurnOrbit
             budgetPct={stats.budgetConsumedPct}
             timePct={stats.timeElapsedPct}
-            size={140}
-            strokeWidth={8}
+            size={100}
+            strokeWidth={6}
             showLabels
+            className="sm:flex-shrink-0"
           />
         </div>
 
-        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
+        <div className="mt-4 sm:mt-6 flex flex-col sm:grid sm:grid-cols-3 gap-2 sm:gap-3">
+          <div className="rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 p-2.5 sm:p-3 flex sm:flex-col items-center sm:items-stretch justify-between sm:justify-start sm:text-center">
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-mono">
               剩余
             </div>
-            <div className="text-xl font-mono font-bold text-white">
+            <div className="text-lg sm:text-xl font-mono font-bold text-white">
               {currency.format(stats.budgetRemaining)}
             </div>
           </div>
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
+          <div className="rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 p-2.5 sm:p-3 flex sm:flex-col items-center sm:items-stretch justify-between sm:justify-start sm:text-center">
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-mono">
               进度
             </div>
-            <div className="text-xl font-mono font-bold text-white">
+            <div className="text-lg sm:text-xl font-mono font-bold text-white">
               {Math.max(0, Math.round(stats.timeElapsedPct * 100))}%
             </div>
           </div>
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
+          <div className="rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 p-2.5 sm:p-3 flex sm:flex-col items-center sm:items-stretch justify-between sm:justify-start sm:text-center">
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-mono">
               燃烧
             </div>
             <div
-              className={`text-xl font-mono font-bold ${stats.budgetConsumedPct <= stats.timeElapsedPct
+              className={`text-lg sm:text-xl font-mono font-bold ${stats.budgetConsumedPct <= stats.timeElapsedPct
                 ? "text-cyan-400"
                 : "text-red-400"
                 }`}
