@@ -463,9 +463,10 @@ export async function updateTransaction(formData: FormData) {
 
     console.log(`[Upload] Starting upload of ${receiptFiles.length} files`);
 
-    // Parallel upload for better performance
+    // Sequential upload for better stability on mobile networks
     if (receiptFiles.length > 0) {
-      await Promise.all(receiptFiles.map(async (file, index) => {
+      for (let index = 0; index < receiptFiles.length; index++) {
+        const file = receiptFiles[index];
         if (file.size > 0) {
           console.log(`[Upload] File ${index + 1}: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
           const ext = file.name.split(".").pop();
@@ -493,7 +494,7 @@ export async function updateTransaction(formData: FormData) {
             throw err;
           }
         }
-      }));
+      }
     }
     console.log(`[Upload] All uploads complete. Total uploaded: ${newReceiptUrls.length}`);
 
