@@ -159,17 +159,6 @@ export function EditTransactionDialog({
             alert("删除失败: " + (error.message || "未知错误"));
         } finally {
             setIsDeleting(false);
-            setLongPressTarget(null);
-        }
-    };
-
-    const handleLongPressStart = (imagePath: string) => {
-        setLongPressTarget(imagePath);
-    };
-
-    const handleLongPressEnd = () => {
-        if (longPressTarget) {
-            handleDeleteImage(longPressTarget);
         }
     };
 
@@ -241,39 +230,32 @@ export function EditTransactionDialog({
                             <label className="text-xs text-white/50 font-mono uppercase tracking-wider">已上传的凭证</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {existingImages.map((img) => (
-                                    <motion.div
+                                    <div
                                         key={img.path}
-                                        className="relative group aspect-square rounded-lg overflow-hidden border border-white/10 bg-white/5 cursor-pointer"
-                                        whileTap={{ scale: 0.95 }}
-                                        onTouchStart={() => handleLongPressStart(img.path)}
-                                        onTouchEnd={handleLongPressEnd}
-                                        onMouseDown={() => handleLongPressStart(img.path)}
-                                        onMouseUp={handleLongPressEnd}
-                                        onMouseLeave={() => setLongPressTarget(null)}
+                                        className="relative group aspect-square rounded-lg overflow-hidden border border-white/10 bg-white/5"
                                     >
                                         <img
                                             src={img.url}
                                             alt="Receipt"
                                             className="w-full h-full object-cover"
                                         />
-                                        {longPressTarget === img.path && (
-                                            <motion.div
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="absolute inset-0 bg-red-500/80 flex items-center justify-center"
-                                            >
-                                                <Trash2 className="text-white" size={24} />
-                                            </motion.div>
-                                        )}
-                                        {isDeleting && longPressTarget === img.path && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteImage(img.path)}
+                                            disabled={isDeleting}
+                                            className="absolute top-1 right-1 p-1.5 bg-red-500 rounded-full text-white shadow-lg hover:bg-red-600 active:scale-90 transition-all disabled:opacity-50"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                        {isDeleting && (
                                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                                 <Loader2 className="animate-spin text-white" size={20} />
                                             </div>
                                         )}
-                                    </motion.div>
+                                    </div>
                                 ))}
                             </div>
-                            <p className="text-xs text-white/40 font-mono">💡 长按图片可删除</p>
+                            <p className="text-xs text-white/40 font-mono">💡 点击右上角 ✕ 删除图片</p>
                         </div>
                     )}
 
