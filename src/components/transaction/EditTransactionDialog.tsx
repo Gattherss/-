@@ -41,7 +41,6 @@ export function EditTransactionDialog({
         errorMessage?: string;
     }>({ current: 0, total: 0, status: 'idle' });
     const [existingImages, setExistingImages] = useState<{ path: string; url: string }[]>([]);
-    const [longPressTarget, setLongPressTarget] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [fileCountError, setFileCountError] = useState<string | null>(null);
 
