@@ -3,8 +3,9 @@
 import { useState, useTransition, useEffect } from "react";
 import { Loader2, Upload, Calendar as CalendarIcon, X, CheckCircle2, XCircle, AlertCircle, Trash2 } from "lucide-react";
 import { Transaction } from "@/types";
-import { updateTransaction, deleteReceiptImage, getReceiptUrl } from "@/app/actions";
+import { updateTransaction, deleteReceiptImage, getReceiptUrl, appendReceiptUrls } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
+import { uploadReceiptImages } from "@/lib/upload-client";
 
 interface EditTransactionDialogProps {
     transaction: Transaction;
@@ -71,9 +72,42 @@ export function EditTransactionDialog({
         }
         setFileCountError(null);
 
-        // Show upload progress if there are files
+        // If there are files, upload them directly from client first
+        let uploadedPaths: string[] = [];
         if (receiptFiles.length > 0) {
             setUploadProgress({ current: 0, total: receiptFiles.length, status: 'uploading' });
+
+            try {
+                const result = await uploadReceiptImages(
+                    projectId,
+                    receiptFiles,
+                    (current, total) => {
+                        setUploadProgress({ current, total, status: 'uploading' });
+                    }
+                );
+
+                uploadedPaths = result.paths;
+
+                if (result.errors.length > 0) {
+                    setUploadProgress({
+                        current: uploadedPaths.length,
+                        total: receiptFiles.length,
+                        status: 'error',
+                        errorMessage: result.errors.join('; ')
+                    });
+                    setTimeout(() => setUploadProgress({ current: 0, total: 0, status: 'idle' }), 5000);
+                    return;
+                }
+            } catch (error: any) {
+                setUploadProgress({
+                    current: 0,
+                    total: receiptFiles.length,
+                    status: 'error',
+                    errorMessage: error.message || '网络连接失败'
+                });
+                setTimeout(() => setUploadProgress({ current: 0, total: 0, status: 'idle' }), 5000);
+                return;
+            }
         }
 
         const formData = new FormData();
@@ -83,10 +117,7 @@ export function EditTransactionDialog({
         formData.append("amount", amount);
         formData.append("notes", notes);
         formData.append("occurredAt", new Date(date).toISOString());
-
-        receiptFiles.forEach((file) => {
-            formData.append("receipt", file);
-        });
+        // Don't append receipt files - they were uploaded directly
 
         // Creating optimistic transaction object
         const optimisticTx: Transaction = {
@@ -100,6 +131,10 @@ export function EditTransactionDialog({
 
         if (onOptimisticUpdate) {
             onOptimisticUpdate(optimisticTx, formData);
+            // If we uploaded files, save the paths
+            if (uploadedPaths.length > 0) {
+                await appendReceiptUrls(transaction.id, projectId, uploadedPaths);
+            }
             onClose();
             return;
         }
@@ -114,12 +149,22 @@ export function EditTransactionDialog({
                         status: 'error',
                         errorMessage: res.error
                     });
-                    // Auto-hide error after 5 seconds
                     setTimeout(() => setUploadProgress({ current: 0, total: 0, status: 'idle' }), 5000);
                 } else {
-                    if (receiptFiles.length > 0) {
+                    // Save uploaded image paths to database
+                    if (uploadedPaths.length > 0) {
+                        const appendRes = await appendReceiptUrls(transaction.id, projectId, uploadedPaths);
+                        if (appendRes?.error) {
+                            setUploadProgress({
+                                current: uploadedPaths.length,
+                                total: receiptFiles.length,
+                                status: 'error',
+                                errorMessage: '图片已上传但保存失败: ' + appendRes.error
+                            });
+                            setTimeout(() => setUploadProgress({ current: 0, total: 0, status: 'idle' }), 5000);
+                            return;
+                        }
                         setUploadProgress({ current: receiptFiles.length, total: receiptFiles.length, status: 'success' });
-                        // Auto-hide success and close dialog after 1 second
                         setTimeout(() => {
                             setUploadProgress({ current: 0, total: 0, status: 'idle' });
                             onClose();

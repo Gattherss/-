@@ -206,6 +206,59 @@ export async function deleteReceiptImage(transactionId: string, projectId: strin
   }
 }
 
+/**
+ * Append receipt image URLs to a transaction.
+ * Used after client-side direct upload to Supabase Storage.
+ */
+export async function appendReceiptUrls(
+  transactionId: string,
+  projectId: string,
+  newPaths: string[]
+) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: "请先登录" };
+  }
+
+  if (!newPaths || newPaths.length === 0) {
+    return { error: "没有图片路径" };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    // Fetch current transaction
+    const { data: tx, error: fetchError } = await supabase
+      .from("transactions")
+      .select("receipt_urls, receipt_url")
+      .eq("id", transactionId)
+      .single();
+
+    if (fetchError || !tx) {
+      return { error: "找不到交易记录" };
+    }
+
+    const currentTx = tx as any;
+    const existingUrls = currentTx.receipt_urls ?? (currentTx.receipt_url ? [currentTx.receipt_url] : []);
+    const updatedUrls = [...existingUrls, ...newPaths];
+
+    const { error: updateError } = await (supabase as any)
+      .from("transactions")
+      .update({ receipt_urls: updatedUrls })
+      .eq("id", transactionId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    revalidatePath(`/p/${projectId}`);
+    revalidatePath("/");
+    return { success: true, newUrls: updatedUrls };
+  } catch (error: any) {
+    return { error: error.message || "保存失败" };
+  }
+}
+
 export async function updateProject(
   id: string,
   payload: Partial<{
