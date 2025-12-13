@@ -80,8 +80,9 @@ export async function createTransaction(formData: FormData) {
   const receiptFiles = formData.getAll("receipt") as File[];
   const receiptUrls: string[] = [];
 
+  // Sequential upload to avoid concurrent request limits and network congestion
   if (receiptFiles.length > 0) {
-    await Promise.all(receiptFiles.map(async (file) => {
+    for (const file of receiptFiles) {
       if (file.size > 0) {
         const ext = file.name.split(".").pop();
         const objectPath = `${projectId}/${crypto.randomUUID()}.${ext || "bin"}`;
@@ -98,7 +99,7 @@ export async function createTransaction(formData: FormData) {
         });
         receiptUrls.push(objectPath);
       }
-    }));
+    }
   }
 
   const category = formData.get("category")?.toString() || null;
@@ -414,8 +415,9 @@ export async function updateTransaction(formData: FormData) {
     const receiptFiles = formData.getAll("receipt") as File[];
     const newReceiptUrls: string[] = [];
 
+    // Sequential upload to avoid concurrent request limits and network congestion
     if (receiptFiles.length > 0) {
-      await Promise.all(receiptFiles.map(async (file) => {
+      for (const file of receiptFiles) {
         if (file.size > 0) {
           const ext = file.name.split(".").pop();
           const objectPath = `${projectId}/${crypto.randomUUID()}.${ext || "bin"}`;
@@ -432,7 +434,7 @@ export async function updateTransaction(formData: FormData) {
           });
           newReceiptUrls.push(objectPath);
         }
-      }));
+      }
     }
 
     if (newReceiptUrls.length > 0) {
