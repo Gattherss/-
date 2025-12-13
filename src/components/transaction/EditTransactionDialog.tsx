@@ -43,9 +43,6 @@ export function EditTransactionDialog({
     }>({ current: 0, total: 0, status: 'idle' });
     const [existingImages, setExistingImages] = useState<{ path: string; url: string }[]>([]);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [fileCountError, setFileCountError] = useState<string | null>(null);
-
-    const MAX_UPLOAD_COUNT = 5;
 
     // Load existing images
     useEffect(() => {
@@ -64,13 +61,6 @@ export function EditTransactionDialog({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isPending) return;
-
-        // Validate file count
-        if (receiptFiles.length > MAX_UPLOAD_COUNT) {
-            setFileCountError(`每次最多只能上传 ${MAX_UPLOAD_COUNT} 张图片，请重新选择`);
-            return;
-        }
-        setFileCountError(null);
 
         // If there are files, upload them directly from client first
         let uploadedPaths: string[] = [];
@@ -311,17 +301,7 @@ export function EditTransactionDialog({
                                 type="file"
                                 accept="image/*"
                                 multiple
-                                onChange={(e) => {
-                                    const files = Array.from(e.target.files || []);
-                                    if (files.length > MAX_UPLOAD_COUNT) {
-                                        setFileCountError(`每次最多只能上传 ${MAX_UPLOAD_COUNT} 张图片`);
-                                        setReceiptFiles([]);
-                                        e.target.value = ''; // Reset input
-                                    } else {
-                                        setFileCountError(null);
-                                        setReceiptFiles(files);
-                                    }
-                                }}
+                                onChange={(e) => setReceiptFiles(Array.from(e.target.files || []))}
                                 className="hidden"
                                 id="receipt-upload"
                             />
@@ -332,10 +312,10 @@ export function EditTransactionDialog({
                                 <Upload size={16} />
                                 <span className="text-sm truncate">
                                     {receiptFiles.length > 0
-                                        ? `已选择 ${receiptFiles.length} 张新图片${receiptFiles.length > MAX_UPLOAD_COUNT ? ' ⚠️ 超出限制' : ''}`
+                                        ? `已选择 ${receiptFiles.length} 张新图片`
                                         : (transaction.receipt_urls?.length
                                             ? `已有 ${transaction.receipt_urls.length} 张凭证 (上传将追加)`
-                                            : (transaction.receipt_url ? "已有 1 张凭证 (上传将追加)" : "点击上传图片 (最多5张)")
+                                            : (transaction.receipt_url ? "已有 1 张凭证 (上传将追加)" : "点击上传图片 (支持多选)")
                                         )
                                     }
                                 </span>
