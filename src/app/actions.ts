@@ -461,27 +461,41 @@ export async function updateTransaction(formData: FormData) {
     const receiptFiles = formData.getAll("receipt") as File[];
     const newReceiptUrls: string[] = [];
 
+    console.log(`[Upload] Starting upload of ${receiptFiles.length} files`);
+
     // Parallel upload for better performance
     if (receiptFiles.length > 0) {
-      await Promise.all(receiptFiles.map(async (file) => {
+      await Promise.all(receiptFiles.map(async (file, index) => {
         if (file.size > 0) {
+          console.log(`[Upload] File ${index + 1}: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
           const ext = file.name.split(".").pop();
           const objectPath = `${projectId}/${crypto.randomUUID()}.${ext || "bin"}`;
 
-          await withRetry(async () => {
-            const { error: uploadError } = await supabase.storage
-              .from("receipts")
-              .upload(objectPath, file, {
-                cacheControl: "3600",
-                contentType: file.type || "application/octet-stream",
-                upsert: false,
-              });
-            if (uploadError) throw new Error(uploadError.message);
-          });
-          newReceiptUrls.push(objectPath);
+          try {
+            await withRetry(async () => {
+              console.log(`[Upload] Uploading file ${index + 1} to path: ${objectPath}`);
+              const { error: uploadError } = await supabase.storage
+                .from("receipts")
+                .upload(objectPath, file, {
+                  cacheControl: "3600",
+                  contentType: file.type || "application/octet-stream",
+                  upsert: false,
+                });
+              if (uploadError) {
+                console.error(`[Upload] Error uploading file ${index + 1}:`, uploadError);
+                throw new Error(uploadError.message);
+              }
+              console.log(`[Upload] File ${index + 1} uploaded successfully`);
+            });
+            newReceiptUrls.push(objectPath);
+          } catch (err: any) {
+            console.error(`[Upload] Failed to upload file ${index + 1} after retries:`, err.message);
+            throw err;
+          }
         }
       }));
     }
+    console.log(`[Upload] All uploads complete. Total uploaded: ${newReceiptUrls.length}`);
 
     if (newReceiptUrls.length > 0) {
       // Fetch current to append
