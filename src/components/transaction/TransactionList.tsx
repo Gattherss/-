@@ -15,6 +15,7 @@ type OptimisticAction =
     | { type: "update"; transaction: Transaction };
 
 export function TransactionList({ initialTransactions, projectId }: TransactionListProps) {
+    const [isPending, startTransition] = useTransition();
     const [optimisticTransactions, sectionsDispatch] = useOptimistic(
         initialTransactions,
         (state, action: OptimisticAction) => {
@@ -34,24 +35,28 @@ export function TransactionList({ initialTransactions, projectId }: TransactionL
     const grouped = groupTransactionsByDate(optimisticTransactions);
 
     const handleDelete = async (id: string) => {
-        sectionsDispatch({ type: "delete", id });
-        const res = await deleteTransaction(id, projectId);
-        if (res?.error) {
-            alert("删除失败: " + res.error);
-            // In a real app we might revert the optimistic update here
-            // router.refresh(); 
-        }
+        startTransition(async () => {
+            sectionsDispatch({ type: "delete", id });
+            const res = await deleteTransaction(id, projectId);
+            if (res?.error) {
+                alert("删除失败: " + res.error);
+                // In a real app we might revert the optimistic update here
+                // router.refresh(); 
+            }
+        });
     };
 
     const handleUpdate = async (updatedTx: Transaction, formData: FormData) => {
-        // Optimistically update UI
-        sectionsDispatch({ type: "update", transaction: updatedTx });
-        // Perform actual server update
-        const res = await updateTransaction(formData);
-        if (res?.error) {
-            alert("更新失败，即将刷新页面: " + res.error);
-            // In a real app we might revert logic here or router.refresh()
-        }
+        startTransition(async () => {
+            // Optimistically update UI
+            sectionsDispatch({ type: "update", transaction: updatedTx });
+            // Perform actual server update
+            const res = await updateTransaction(formData);
+            if (res?.error) {
+                alert("更新失败，即将刷新页面: " + res.error);
+                // In a real app we might revert logic here or router.refresh()
+            }
+        });
     };
 
     return (
