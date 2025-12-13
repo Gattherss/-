@@ -293,71 +293,82 @@ export function EditTransactionDialog({
                                             : (transaction.receipt_url ? "已有 1 张凭证 (上传将追加)" : "点击上传图片 (最多5张)")
                                         )
                                     }
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="mt-2 p-3 rounded-xl border"
-                                    style={{
-                                        backgroundColor: uploadProgress.status === 'success' ? 'rgba(34, 197, 94, 0.1)' :
-                                            uploadProgress.status === 'error' ? 'rgba(239, 68, 68, 0.1)' :
-                                                'rgba(6, 182, 212, 0.1)',
-                                        borderColor: uploadProgress.status === 'success' ? 'rgba(34, 197, 94, 0.3)' :
-                                            uploadProgress.status === 'error' ? 'rgba(239, 68, 68, 0.3)' :
-                                                'rgba(6, 182, 212, 0.3)'
-                                    }}
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Upload Progress Indicator */}
+                    <AnimatePresence>
+                        {uploadProgress.status !== 'idle' && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="mt-2 p-3 rounded-xl border"
+                                style={{
+                                    backgroundColor: uploadProgress.status === 'success' ? 'rgba(34, 197, 94, 0.1)' :
+                                        uploadProgress.status === 'error' ? 'rgba(239, 68, 68, 0.1)' :
+                                            'rgba(6, 182, 212, 0.1)',
+                                    borderColor: uploadProgress.status === 'success' ? 'rgba(34, 197, 94, 0.3)' :
+                                        uploadProgress.status === 'error' ? 'rgba(239, 68, 68, 0.3)' :
+                                            'rgba(6, 182, 212, 0.3)'
+                                }}
                             >
-                                    <div className="flex items-center gap-2">
-                                        {uploadProgress.status === 'uploading' && (
-                                            <>
-                                                <Loader2 className="animate-spin text-cyan-400" size={18} />
-                                                <span className="text-sm text-white font-mono">
-                                                    正在上传图片... ({uploadProgress.current}/{uploadProgress.total})
-                                                </span>
-                                            </>
-                                        )}
-                                        {uploadProgress.status === 'success' && (
-                                            <>
-                                                <CheckCircle2 className="text-green-400" size={18} />
-                                                <span className="text-sm text-green-400 font-mono">
-                                                    ✓ 上传成功！({uploadProgress.current}/{uploadProgress.total})
-                                                </span>
-                                            </>
-                                        )}
-                                        {uploadProgress.status === 'error' && (
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <XCircle className="text-red-400 flex-shrink-0" size={18} />
-                                                    <span className="text-sm text-red-400 font-bold">上传失败</span>
-                                                </div>
-                                                <div className="pl-6 space-y-1">
-                                                    <p className="text-xs text-red-300">{uploadProgress.errorMessage}</p>
-                                                    <div className="flex items-start gap-1.5 text-xs text-red-200/80">
-                                                        <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
-                                                        <div>
-                                                            <p className="font-mono mb-1">可能原因：</p>
-                                                            <ul className="space-y-0.5 list-disc list-inside text-red-200/60">
-                                                                <li>网络连接不稳定</li>
-                                                                <li>图片文件过大（建议&lt;5MB）</li>
-                                                                <li>存储空间不足</li>
-                                                            </ul>
-                                                        </div>
+                                <div className="flex items-center gap-2">
+                                    {uploadProgress.status === 'uploading' && (
+                                        <>
+                                            <Loader2 className="animate-spin text-cyan-400" size={18} />
+                                            <span className="text-sm text-white font-mono">
+                                                正在上传图片... ({uploadProgress.current}/{uploadProgress.total})
+                                            </span>
+                                        </>
+                                    )}
+                                    {uploadProgress.status === 'success' && (
+                                        <>
+                                            <CheckCircle2 className="text-green-400" size={18} />
+                                            <span className="text-sm text-green-400 font-mono">
+                                                ✓ 上传成功！({uploadProgress.current}/{uploadProgress.total})
+                                            </span>
+                                        </>
+                                    )}
+                                    {uploadProgress.status === 'error' && (
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <XCircle className="text-red-400 flex-shrink-0" size={18} />
+                                                <span className="text-sm text-red-400 font-bold">上传失败</span>
+                                            </div>
+                                            <div className="pl-6 space-y-1">
+                                                <p className="text-xs text-red-300">{uploadProgress.errorMessage}</p>
+                                                <div className="flex items-start gap-1.5 text-xs text-red-200/80">
+                                                    <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+                                                    <div>
+                                                        <p className="font-mono mb-1">可能原因：</p>
+                                                        <ul className="space-y-0.5 list-disc list-inside text-red-200/60">
+                                                            <li>网络连接不稳定</li>
+                                                            <li>图片文件过大（建议&lt;5MB）</li>
+                                                            <li>存储空间不足</li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                </motion.div>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
                         )}
-                            </AnimatePresence>
+                    </AnimatePresence>
 
-                            <button
-                                type="submit"
-                                disabled={isPending || uploadProgress.status === 'uploading'}
-                                className="w-full h-12 mt-2 bg-white text-black font-bold rounded-xl active:scale-95 transition disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
-                            >
-                                {isPending ? <Loader2 className="animate-spin" size={18} /> : null}
-                                {isPending ? "保存中..." : "保存修改"}
-                            </button>
-                        </form>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={isPending || uploadProgress.status === 'uploading'}
+                        className="w-full h-12 mt-2 bg-white text-black font-bold rounded-xl active:scale-95 transition disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                    >
+                        {isPending ? <Loader2 className="animate-spin" size={18} /> : null}
+                        {isPending ? "保存中..." : "保存修改"}
+                    </button>
+                </form>
             </div>
-            );
+        </div>
+    );
 }
