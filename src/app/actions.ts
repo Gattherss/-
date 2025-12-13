@@ -160,6 +160,52 @@ export async function getReceiptUrl(path: string) {
   return { url: data?.signedUrl };
 }
 
+export async function deleteReceiptImage(transactionId: string, projectId: string, imagePath: string) {
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    // Delete from storage
+    const { error: storageError } = await supabase.storage
+      .from("receipts")
+      .remove([imagePath]);
+
+    if (storageError) {
+      console.warn("Storage delete warning:", storageError.message);
+      // Continue even if storage delete fails (file might already be deleted)
+    }
+
+    // Update transaction to remove the image path from receipt_urls
+    const { data: tx, error: fetchError } = await supabase
+      .from("transactions")
+      .select("receipt_urls, receipt_url")
+      .eq("id", transactionId)
+      .single();
+
+    if (fetchError || !tx) {
+      return { error: "找不到交易记录" };
+    }
+
+    const currentTx = tx as any;
+    const existingUrls = currentTx.receipt_urls ?? (currentTx.receipt_url ? [currentTx.receipt_url] : []);
+    const updatedUrls = existingUrls.filter((url: string) => url !== imagePath);
+
+    const { error: updateError } = await (supabase as any)
+      .from("transactions")
+      .update({ receipt_urls: updatedUrls.length > 0 ? updatedUrls : null })
+      .eq("id", transactionId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    revalidatePath(`/p/${projectId}`);
+    revalidatePath("/");
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "删除失败" };
+  }
+}
+
 export async function updateProject(
   id: string,
   payload: Partial<{
